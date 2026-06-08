@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  /* Quins Tracker dark-theme design tokens (shared with mykasih-crm) */
+  --bg-primary: #0D1117;
+  --bg-surface: #161B22;
+  --bg-border: #21262D;
+  --text-primary: #E6EDF3;
+  --text-muted: #7D8590;
+  --accent-primary: #2E7D32;
+  --accent-teal: #00897B;
+  --status-green: #3FB950;
+  --status-yellow: #D29922;
+  --status-red: #F85149;
+
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+}
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --color-surface: var(--bg-surface);
+  --color-border-subtle: var(--bg-border);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent-primary);
+  --color-teal: var(--accent-teal);
+  --color-status-green: var(--status-green);
+  --color-status-yellow: var(--status-yellow);
+  --color-status-red: var(--status-red);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+}
+
+* {
+  border-color: var(--bg-border);
+}
