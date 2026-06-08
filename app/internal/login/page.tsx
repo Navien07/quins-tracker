@@ -11,12 +11,11 @@ export default function LoginPage() {
   const [msg, setMsg] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  const supabase = createSupabaseBrowser()
-
   async function signInWithPassword(e: React.FormEvent) {
     e.preventDefault()
     setBusy(true)
     setMsg(null)
+    const supabase = createSupabaseBrowser()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     setBusy(false)
     if (error) {
@@ -34,6 +33,7 @@ export default function LoginPage() {
     }
     setBusy(true)
     setMsg(null)
+    const supabase = createSupabaseBrowser()
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${window.location.origin}/internal` },
