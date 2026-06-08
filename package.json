@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "leak-scan": "tsx scripts/leak-scan.ts",
+    "prebuild": "npm run leak-scan",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
