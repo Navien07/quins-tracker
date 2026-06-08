@@ -1,0 +1,34 @@
+# COPY THIS TO: MyKasih-VA/mykasih/.github/workflows/tracker-sync.yml
+#
+# This workflow lives in the BUILD repo (MyKasih-VA/mykasih), NOT in the tracker app.
+# GitHub Actions fire from the repo where the events happen, so it belongs there.
+# It signs an event payload with HMAC-SHA256 and POSTs it to the deployed tracker.
+#
+# Requires repo secrets in MyKasih-VA/mykasih:
+#   TRACKER_URL            = https://quins-tracker.vercel.app/api/tracker/sync
+#   GITHUB_WEBHOOK_SECRET  = (same value as the tracker's GITHUB_WEBHOOK_SECRET)
+name: Quins Tracker Sync
+on:
+  push:
+    tags: ['p2-*', 'v*', 'tracker-live']
+  pull_request:
+    types: [closed]
+    branches: [phase2]
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build payload + sign + POST
+        env:
+          TRACKER_URL: ${{ secrets.TRACKER_URL }}
+          SECRET: ${{ secrets.GITHUB_WEBHOOK_SECRET }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            BODY=$(jq -nc --arg t "$TAG" --arg s "${{ github.sha }}" --arg u "${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG" '{event:"tag",tag:$t,sha:$s,url:$u}')
+          else
+            if [ "${{ github.event.pull_request.merged }}" != "true" ]; then echo "PR not merged, skip"; exit 0; fi
+            BODY=$(jq -nc --arg t "${{ github.event.pull_request.title }}" --arg s "${{ github.event.pull_request.merge_commit_sha }}" --arg u "${{ github.event.pull_request.html_url }}" '{event:"pr_merged",pr_title:$t,sha:$s,url:$u}')
+          fi
+          SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
+          curl -fsS -X POST "$TRACKER_URL" -H "Content-Type: application/json" -H "x-tracker-signature: $SIG" -d "$BODY"
