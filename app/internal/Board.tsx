@@ -10,6 +10,7 @@ import { TRACKS } from '@/lib/types'
 import { phaseHealth, expectedPercent, todayDayIndex, daysToGoLive } from '@/lib/health'
 import ResyncButton from './ResyncButton'
 import CopyLink from './CopyLink'
+import TestNotifyButton from './TestNotifyButton'
 import SignOutButton from './SignOutButton'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -128,6 +129,7 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
             <SignOutButton />
           </div>
           <CopyLink url={shareUrl} />
+          <TestNotifyButton />
         </div>
       </header>
 

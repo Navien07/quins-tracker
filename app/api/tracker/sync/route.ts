@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
         occurred_at: new Date().toISOString(),
       })
       // Ping the client only for brand-safe, client-facing milestones.
-      if (milestone && isClean(milestone)) await notifyClient(milestone, body.url)
+      if (milestone && isClean(milestone)) await notifyClient(milestone)
     }
   } else if (body.event === 'pr_merged' && body.pr_title) {
     const pid = commitToPhaseId(body.pr_title)
