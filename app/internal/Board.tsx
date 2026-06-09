@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Search, Plus, X, Check, ChevronDown, Trash2, Circle,
@@ -48,9 +48,20 @@ interface BoardProps {
 }
 
 export default function Board({ phases, tasks, blockers, activity, lastSync, shareUrl, today }: BoardProps) {
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [trackFilter, setTrackFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [live, setLive] = useState(true)
+
+  // Live auto-refresh: re-pull server data every 45s while the tab is visible.
+  useEffect(() => {
+    if (!live) return
+    const id = setInterval(() => {
+      if (document.visibilityState === 'visible') router.refresh()
+    }, 45_000)
+    return () => clearInterval(id)
+  }, [live, router])
 
   const tasksByPhase = useMemo(() => {
     const m = new Map<string, Task[]>()
@@ -95,8 +106,20 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
           <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
             Quins Tracker — Internal Board
           </h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Last sync: {lastSync ? `${fmtDateTime(lastSync.synced_at)} (${lastSync.source})` : 'never'}
+          <p className="mt-1 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <button
+              onClick={() => setLive((v) => !v)}
+              className="inline-flex items-center gap-1.5"
+              title={live ? 'Live auto-refresh on (every 45s)' : 'Auto-refresh paused'}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${live ? 'animate-pulse' : ''}`}
+                style={{ backgroundColor: live ? 'var(--status-green)' : 'var(--text-muted)' }}
+              />
+              {live ? 'Live' : 'Paused'}
+            </button>
+            <span>·</span>
+            <span>Last sync: {lastSync ? `${fmtDateTime(lastSync.synced_at)} (${lastSync.source})` : 'never'}</span>
           </p>
         </div>
         <div className="flex flex-col items-end gap-3">

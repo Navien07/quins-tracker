@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { admin } from '@/lib/supabase-admin'
 import { tagToPhaseId, commitToPhaseId, reconcile } from '@/lib/github'
-import { tagToClientMilestone } from '@/lib/translate'
+import { tagToClientMilestone, isClean } from '@/lib/translate'
+import { notifyClient } from '@/lib/notify'
 
 export const runtime = 'nodejs'
 
@@ -32,11 +33,14 @@ export async function POST(req: NextRequest) {
     const pid = tagToPhaseId(body.tag)
     if (pid) {
       await markDelivered(pid)
+      const milestone = tagToClientMilestone(body.tag)
       await admin.from('activity').insert({
         phase_id: pid, kind: 'tag', raw_message: `tag ${body.tag}`,
-        client_label: tagToClientMilestone(body.tag), sha: body.sha, url: body.url,
+        client_label: milestone, sha: body.sha, url: body.url,
         occurred_at: new Date().toISOString(),
       })
+      // Ping the client only for brand-safe, client-facing milestones.
+      if (milestone && isClean(milestone)) await notifyClient(milestone, body.url)
     }
   } else if (body.event === 'pr_merged' && body.pr_title) {
     const pid = commitToPhaseId(body.pr_title)

@@ -45,13 +45,44 @@ export function clientStatus(status: string): string {
   }
 }
 
+/**
+ * Short, client-safe descriptions per workstream, keyed by client_name.
+ * Authored to contain NO internal/vendor terms. Still passed through isClean()
+ * before render as a final guard.
+ */
+const CLIENT_BLURBS: Record<string, string> = {
+  'Emotional Intelligence Engine — Foundation':
+    'The core engine that reads sentiment and emotional tone across customer conversations — the foundation for smarter, more empathetic support.',
+  'Dashboard Analytics & Sentiment':
+    'Live analytics and sentiment breakdowns so the team can see customer mood and trends at a glance.',
+  'Command Centre Dashboard V2':
+    'A redesigned operations dashboard that brings cases, live metrics and alerts into one streamlined command centre.',
+  'Voice & WhatsApp Assistant V2':
+    'An upgraded voice and WhatsApp assistant for faster, more natural automated customer conversations.',
+  'Testing & Go-Live':
+    'End-to-end testing, user acceptance and the controlled production launch of the new system.',
+  'Model Calibration & Quality Assurance':
+    'Continuous tuning and quality checks that keep the AI accurate, fair and dependable.',
+  'Advanced Voice Emotion Model':
+    'A next-generation model that understands emotion directly from a caller’s voice.',
+}
+
+/** Brand-safe one-line description for a client-visible workstream (or null). */
+export function phaseBlurb(clientName: string): string | null {
+  const b = CLIENT_BLURBS[clientName]
+  return b && isClean(b) ? b : null
+}
+
 /** Shape returned to the client view — derived ONLY from safe columns. */
 export interface ClientPhaseView {
   name: string          // client_name
+  blurb: string | null  // brand-safe description
   status: string        // clientStatus()
   percent: number
   start: string         // start_date
   end: string           // end_date
+  startDay: number      // 1..30
+  endDay: number        // 1..30
 }
 
 type PhaseRow = {
@@ -61,6 +92,8 @@ type PhaseRow = {
   percent: number
   start_date: string
   end_date: string
+  start_day: number
+  end_day: number
 }
 
 export function toClientPhases(rows: PhaseRow[]): ClientPhaseView[] {
@@ -68,9 +101,12 @@ export function toClientPhases(rows: PhaseRow[]): ClientPhaseView[] {
     .filter(r => r.client_visible && r.client_name && isClean(r.client_name))
     .map(r => ({
       name: r.client_name as string,
+      blurb: phaseBlurb(r.client_name as string),
       status: clientStatus(r.status),
       percent: r.percent,
       start: r.start_date,
       end: r.end_date,
+      startDay: r.start_day,
+      endDay: r.end_day,
     }))
 }
