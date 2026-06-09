@@ -1,12 +1,16 @@
-# COPY THIS TO: MyKasih-VA/mykasih/.github/workflows/tracker-sync.yml
+# COPY THIS TO: Navien07/mykasih/.github/workflows/tracker-sync.yml
 #
-# This workflow lives in the BUILD repo (MyKasih-VA/mykasih), NOT in the tracker app.
+# This workflow lives in the BUILD repo (Navien07/mykasih), NOT in the tracker app.
 # GitHub Actions fire from the repo where the events happen, so it belongs there.
 # It signs an event payload with HMAC-SHA256 and POSTs it to the deployed tracker.
 #
-# Requires repo secrets in MyKasih-VA/mykasih:
-#   TRACKER_URL            = https://quins-tracker.vercel.app/api/tracker/sync
-#   GITHUB_WEBHOOK_SECRET  = (same value as the tracker's GITHUB_WEBHOOK_SECRET)
+# Requires repo secrets in Navien07/mykasih (Settings → Secrets and variables → Actions):
+#   TRACKER_URL             = https://quins-tracker.vercel.app/api/tracker/sync
+#   TRACKER_WEBHOOK_SECRET  = (SAME value as the tracker's GITHUB_WEBHOOK_SECRET on Vercel)
+#
+# NOTE: GitHub reserves the "GITHUB_" secret-name prefix, so the secret is named
+# TRACKER_WEBHOOK_SECRET here even though the tracker app reads it as GITHUB_WEBHOOK_SECRET.
+# Only the names differ — the hex value must match on both sides.
 name: Quins Tracker Sync
 on:
   push:
@@ -21,7 +25,7 @@ jobs:
       - name: Build payload + sign + POST
         env:
           TRACKER_URL: ${{ secrets.TRACKER_URL }}
-          SECRET: ${{ secrets.GITHUB_WEBHOOK_SECRET }}
+          SECRET: ${{ secrets.TRACKER_WEBHOOK_SECRET }}
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             TAG="${GITHUB_REF#refs/tags/}"
