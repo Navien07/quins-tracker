@@ -4,7 +4,7 @@ import WhatsNew from './WhatsNew'
 import LivePreview from './LivePreview'
 import AnimatedRing from '@/components/AnimatedRing'
 import Reveal from '@/components/Reveal'
-import { CheckCircle2, Clock, CalendarDays, ArrowUpRight, Rocket } from 'lucide-react'
+import { CheckCircle2, Clock, CalendarDays, ArrowUpRight, Rocket, ChevronRight, Check } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,6 +160,45 @@ export default async function ClientView({ params }: { params: Promise<{ token: 
                   <span>{fmtRange(p.start, p.end)}</span>
                   <span className="font-semibold text-[var(--text-primary)]">{p.percent}%</span>
                 </div>
+
+                {p.features.length > 0 && (() => {
+                  const done = Math.round((p.percent / 100) * p.features.length)
+                  return (
+                    <details className="group mt-3 border-t border-[var(--bg-border)] pt-3">
+                      <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs font-medium text-[var(--accent-teal)]">
+                        <ChevronRight size={13} className="transition group-open:rotate-90" />
+                        What&rsquo;s included ({done}/{p.features.length})
+                      </summary>
+                      <ul className="mt-3 space-y-2">
+                        {p.features.map((f, fi) => {
+                          const isDone = fi < done
+                          const isActive = fi === done && p.status === 'In Progress'
+                          return (
+                            <li key={fi} className="flex items-center gap-2.5 text-sm">
+                              {isDone ? (
+                                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: 'var(--status-green)' }}>
+                                  <Check size={11} color="#000" />
+                                </span>
+                              ) : isActive ? (
+                                <span className="h-2.5 w-2.5 shrink-0 rounded-full pulse-dot" style={{ backgroundColor: 'var(--accent-teal)' }} />
+                              ) : (
+                                <span className="h-2.5 w-2.5 shrink-0 rounded-full border" style={{ borderColor: 'var(--bg-border)' }} />
+                              )}
+                              <span className={isDone ? 'text-[var(--text-primary)]' : isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}>
+                                {f}
+                              </span>
+                              {isActive && (
+                                <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: 'var(--accent-teal)22', color: 'var(--accent-teal)' }}>
+                                  In progress
+                                </span>
+                              )}
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </details>
+                  )
+                })()}
               </article>
             )
           })}

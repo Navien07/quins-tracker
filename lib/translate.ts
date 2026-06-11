@@ -73,10 +73,67 @@ export function phaseBlurb(clientName: string): string | null {
   return b && isClean(b) ? b : null
 }
 
+/**
+ * Brand-safe "aspects being worked on" per workstream, keyed by client_name.
+ * Curated, client-facing component names — NEVER raw internal task titles.
+ * Each item is still passed through isClean() before it reaches the client.
+ */
+const CLIENT_FEATURES: Record<string, string[]> = {
+  'Emotional Intelligence Engine — Foundation': [
+    'Sentiment & emotional tone detection',
+    'Conversation ingestion pipeline',
+    'Emotion data model & storage',
+    'Accuracy baseline & validation',
+  ],
+  'Dashboard Analytics & Sentiment': [
+    'Sentiment aggregation & scoring',
+    'Daily / weekly mood trend charts',
+    'Conversation topic grouping',
+    'Analytics data services',
+  ],
+  'Command Centre Dashboard V2': [
+    'New command-centre layout & navigation',
+    'Live case feed with emotion indicators',
+    'Configurable alerts & thresholds',
+    'Case drill-down detail view',
+    'Mobile-responsive experience',
+  ],
+  'Voice & WhatsApp Assistant V2': [
+    'Upgraded voice channel',
+    'Improved WhatsApp assistant flows',
+    'Chatbot integration',
+    'End-to-end channel testing',
+  ],
+  'Testing & Go-Live': [
+    'User acceptance test scripts',
+    'UAT rounds with the MyKASIH team',
+    'Sign-off & production cutover',
+    'Go-live checklist',
+  ],
+  'Model Calibration & Quality Assurance': [
+    'Labelling guidelines',
+    'Sample annotation batches',
+    'Quality & agreement checks',
+    'Calibration reporting',
+  ],
+  'Advanced Voice Emotion Model': [
+    'Audio feature extraction',
+    'Voice emotion model training',
+    'Latency optimisation',
+    'Integration behind a feature flag',
+  ],
+}
+
+/** Brand-safe list of aspects for a client-visible workstream (filtered clean). */
+export function phaseFeatures(clientName: string): string[] {
+  return (CLIENT_FEATURES[clientName] ?? []).filter((f) => isClean(f))
+}
+
 /** Shape returned to the client view — derived ONLY from safe columns. */
 export interface ClientPhaseView {
   name: string          // client_name
   blurb: string | null  // brand-safe description
+  features: string[]    // brand-safe aspects
   status: string        // clientStatus()
   percent: number
   start: string         // start_date
@@ -102,6 +159,7 @@ export function toClientPhases(rows: PhaseRow[]): ClientPhaseView[] {
     .map(r => ({
       name: r.client_name as string,
       blurb: phaseBlurb(r.client_name as string),
+      features: phaseFeatures(r.client_name as string),
       status: clientStatus(r.status),
       percent: r.percent,
       start: r.start_date,
