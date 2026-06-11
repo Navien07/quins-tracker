@@ -52,3 +52,10 @@ export const TRACKS: { key: string; label: string }[] = [
 
 export const GO_LIVE = '2026-07-07'
 export const DAY_ONE = '2026-06-08'
+
+export interface ProgressSnapshot {
+  snap_date: string
+  overall: number
+  delivered: number
+  total: number
+}

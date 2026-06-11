@@ -4,6 +4,7 @@ import { admin } from '@/lib/supabase-admin'
 import { tagToPhaseId, commitToPhaseId, reconcile } from '@/lib/github'
 import { tagToClientMilestone, isClean } from '@/lib/translate'
 import { notifyClient } from '@/lib/notify'
+import { recordSnapshot } from '@/lib/snapshots'
 
 export const runtime = 'nodejs'
 
@@ -62,5 +63,6 @@ export async function POST(req: NextRequest) {
     source: body.event === 'manual_resync' ? 'manual_resync' : 'webhook',
     detail: JSON.stringify(body).slice(0, 300),
   })
+  await recordSnapshot()
   return NextResponse.json({ ok: true })
 }

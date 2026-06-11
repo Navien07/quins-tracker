@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
 import { admin } from '@/lib/supabase-admin'
 import { reconcile } from '@/lib/github'
+import { recordSnapshot } from '@/lib/snapshots'
 
 export const runtime = 'nodejs'
 
@@ -29,6 +30,7 @@ export async function POST() {
     source: 'manual_resync',
     detail: `by ${user.email ?? user.id}: ${JSON.stringify(summary).slice(0, 250)}`,
   })
+  await recordSnapshot()
 
   return NextResponse.json({ ok: true, summary })
 }

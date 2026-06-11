@@ -5,13 +5,11 @@ import { useRouter } from 'next/navigation'
 import {
   Search, Plus, X, Check, ChevronDown, Trash2, Circle,
 } from 'lucide-react'
-import type { Phase, Task, Blocker, Activity, PhaseStatus } from '@/lib/types'
+import type { Phase, Task, Blocker, Activity, PhaseStatus, ProgressSnapshot } from '@/lib/types'
 import { TRACKS } from '@/lib/types'
 import { phaseHealth, expectedPercent, todayDayIndex, daysToGoLive } from '@/lib/health'
-import ResyncButton from './ResyncButton'
-import CopyLink from './CopyLink'
-import TestNotifyButton from './TestNotifyButton'
-import SignOutButton from './SignOutButton'
+import Burndown from '@/components/Burndown'
+import Sidebar from './Sidebar'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function fmtDay(iso: string): string {
@@ -43,12 +41,13 @@ interface BoardProps {
   tasks: Task[]
   blockers: Blocker[]
   activity: Activity[]
+  snapshots: ProgressSnapshot[]
   lastSync: { synced_at: string; source: string } | null
   shareUrl: string
   today: string
 }
 
-export default function Board({ phases, tasks, blockers, activity, lastSync, shareUrl, today }: BoardProps) {
+export default function Board({ phases, tasks, blockers, activity, snapshots, lastSync, shareUrl, today }: BoardProps) {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [trackFilter, setTrackFilter] = useState<string>('all')
@@ -100,13 +99,13 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
   const countdown = daysToGoLive(today)
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      {/* Header */}
-      <header className="glass sticky top-0 z-30 mb-6 -mx-4 flex flex-wrap items-start justify-between gap-4 border-b border-[var(--bg-border)] px-4 py-4 sm:-mx-6 sm:px-6">
+    <div className="lg:flex">
+      <Sidebar shareUrl={shareUrl} />
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-8">
+      {/* Page header */}
+      <header className="mb-8 flex flex-wrap items-start justify-between gap-4" id="overview">
         <div>
-          <h1 className="gradient-text text-2xl font-bold tracking-tight">
-            Quins Tracker — Internal Board
-          </h1>
+          <h1 className="gradient-text text-2xl font-bold tracking-tight">Overview</h1>
           <p className="mt-1 flex items-center gap-2 text-sm text-[var(--text-muted)]">
             <button
               onClick={() => setLive((v) => !v)}
@@ -122,14 +121,6 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
             <span>·</span>
             <span>Last sync: {lastSync ? `${fmtDateTime(lastSync.synced_at)} (${lastSync.source})` : 'never'}</span>
           </p>
-        </div>
-        <div className="flex flex-col items-end gap-3">
-          <div className="flex items-center gap-3">
-            <ResyncButton />
-            <SignOutButton />
-          </div>
-          <CopyLink url={shareUrl} />
-          <TestNotifyButton />
         </div>
       </header>
 
@@ -149,6 +140,14 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
 
       {/* Gantt */}
       <Gantt phases={phases} today={today} />
+
+      {/* Progress over time */}
+      <section id="progress" className="mb-8 scroll-mt-20 rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+          Progress over time
+        </h2>
+        <Burndown snapshots={snapshots} today={today} />
+      </section>
 
       {/* Filters */}
       <section className="mb-5 flex flex-wrap items-center gap-3">
@@ -180,7 +179,7 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
       </section>
 
       {/* Swimlanes */}
-      <section className="mb-10 space-y-8">
+      <section id="board" className="mb-10 scroll-mt-20 space-y-8">
         {TRACKS.map((track) => {
           const lane = filtered.filter((p) => p.track === track.key)
           if (lane.length === 0) return null
@@ -206,7 +205,8 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
         <BlockerPanel blockers={blockers} />
         <ActivityFeed activity={activity} />
       </div>
-    </main>
+      </main>
+    </div>
   )
 }
 
@@ -249,7 +249,7 @@ function Gantt({ phases, today }: { phases: Phase[]; today: string }) {
   const todayLeft = ((todayIdx - 0.5) / 30) * 100
 
   return (
-    <section className="mb-8 overflow-x-auto rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
+    <section id="timeline" className="mb-8 scroll-mt-20 overflow-x-auto rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
       <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
         Timeline — Day 1 to 30
       </h2>
@@ -509,7 +509,7 @@ function BlockerPanel({ blockers }: { blockers: Blocker[] }) {
   }
 
   return (
-    <section>
+    <section id="blockers" className="scroll-mt-20">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">Blockers</h2>
         <button onClick={() => setAdding((a) => !a)} className="inline-flex items-center gap-1 text-xs text-[var(--accent-teal)] hover:underline">
@@ -555,7 +555,7 @@ function BlockerPanel({ blockers }: { blockers: Blocker[] }) {
 
 function ActivityFeed({ activity }: { activity: Activity[] }) {
   return (
-    <section>
+    <section id="activity" className="scroll-mt-20">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
         Activity (raw — internal only)
       </h2>
