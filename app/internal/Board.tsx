@@ -100,11 +100,11 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
   const countdown = daysToGoLive(today)
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       {/* Header */}
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <header className="glass sticky top-0 z-30 mb-6 -mx-4 flex flex-wrap items-start justify-between gap-4 border-b border-[var(--bg-border)] px-4 py-4 sm:-mx-6 sm:px-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
+          <h1 className="gradient-text text-2xl font-bold tracking-tight">
             Quins Tracker — Internal Board
           </h1>
           <p className="mt-1 flex items-center gap-2 text-sm text-[var(--text-muted)]">
@@ -212,8 +212,8 @@ export default function Board({ phases, tasks, blockers, activity, lastSync, sha
 
 function Kpi({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
-    <div className="rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
-      <div className="text-2xl font-semibold" style={{ color: accent }}>{value}</div>
+    <div className="card-hover rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
+      <div className="text-2xl font-bold" style={{ color: accent }}>{value}</div>
       <div className="mt-1 text-xs text-[var(--text-muted)]">{label}</div>
     </div>
   )
@@ -352,10 +352,10 @@ function PhaseCard({ phase, tasks, today }: { phase: Phase; tasks: Task[]; today
   }
 
   return (
-    <article className="rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
+    <article className="card-hover rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4" style={{ borderColor: phase.status === 'in_progress' ? 'color-mix(in srgb, var(--accent-teal) 40%, var(--bg-border))' : undefined }}>
       <div className="mb-2 flex items-start justify-between gap-2">
         <div className="flex items-start gap-2">
-          <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: h.color }} title={h.label} />
+          <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${phase.status === 'in_progress' ? 'pulse-dot' : ''}`} style={{ backgroundColor: h.color }} title={h.label} />
           <h3 className="text-sm font-medium leading-snug text-[var(--text-primary)]">{phase.internal_name}</h3>
         </div>
         <span className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ backgroundColor: sm.color + '22', color: sm.color }}>

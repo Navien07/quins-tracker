@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Sparkles, X } from 'lucide-react'
+import Confetti from '@/components/Confetti'
 
 const KEY = 'quins_client_last_seen'
 
@@ -33,9 +34,10 @@ export default function WhatsNew({ dates }: { dates: string[] }) {
 
   return (
     <div
-      className="mb-6 flex items-center gap-3 rounded-xl border px-4 py-3"
+      className="animate-fade-up mb-6 flex items-center gap-3 rounded-xl border px-4 py-3"
       style={{ borderColor: 'var(--accent-teal)', backgroundColor: 'color-mix(in srgb, var(--accent-teal) 12%, transparent)' }}
     >
+      <Confetti />
       <Sparkles size={18} className="shrink-0" style={{ color: 'var(--accent-teal)' }} />
       <p className="text-sm text-[var(--text-primary)]">
         <span className="font-semibold">{newCount}</span> new update{newCount > 1 ? 's' : ''} since your last visit.

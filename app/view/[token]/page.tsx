@@ -1,7 +1,10 @@
 import { getClientData } from '@/lib/client-data'
 import { todayDayIndex } from '@/lib/health'
 import WhatsNew from './WhatsNew'
-import { CheckCircle2, Clock, CalendarDays, ArrowUpRight } from 'lucide-react'
+import LivePreview from './LivePreview'
+import AnimatedRing from '@/components/AnimatedRing'
+import Reveal from '@/components/Reveal'
+import { CheckCircle2, Clock, CalendarDays, ArrowUpRight, Rocket } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,33 +21,10 @@ function fmtFull(iso: string): string {
 function fmtRange(start: string, end: string): string {
   return `${fmtDay(start)} – ${fmtDay(end)}`
 }
-
 function statusColor(status: string): string {
   if (status === 'Delivered') return 'var(--status-green)'
   if (status === 'In Progress') return 'var(--accent-teal)'
   return 'var(--text-muted)'
-}
-
-function Ring({ percent, size = 120 }: { percent: number; size?: number }) {
-  const stroke = 10
-  const r = (size - stroke) / 2
-  const c = 2 * Math.PI * r
-  const offset = c - (percent / 100) * c
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--bg-border)" strokeWidth={stroke} />
-      <circle
-        cx={size / 2} cy={size / 2} r={r} fill="none"
-        stroke="var(--accent-teal)" strokeWidth={stroke} strokeLinecap="round"
-        strokeDasharray={c} strokeDashoffset={offset}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-      />
-      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central"
-        fill="var(--text-primary)" fontSize={size * 0.22} fontWeight="600">
-        {percent}%
-      </text>
-    </svg>
-  )
 }
 
 export default async function ClientView({ params }: { params: Promise<{ token: string }> }) {
@@ -66,110 +46,136 @@ export default async function ClientView({ params }: { params: Promise<{ token: 
   const today = todayDayIndex(new Date().toISOString().slice(0, 10))
   const showToday = today >= 1 && today <= 30
   const todayLeft = ((today - 0.5) / 30) * 100
+  const inProgress = phases.filter((p) => p.status === 'In Progress').length
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
-      <WhatsNew dates={milestones.map((m) => m.at)} />
-
-      {/* Header */}
-      <header className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-3xl">
-            MyKASIH Command Centre — Phase 2
-          </h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)] sm:text-base">Target go-live: 7 Jul 2026</p>
-          {updatedAt && (
-            <p className="mt-1 text-xs text-[var(--text-muted)]">As of {fmtFull(updatedAt)}</p>
-          )}
-          {demoUrl && (
-            <a
-              href={demoUrl} target="_blank" rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-white transition hover:opacity-90"
-              style={{ backgroundColor: 'var(--accent-primary)' }}
-            >
-              View live preview <ArrowUpRight size={15} />
-            </a>
-          )}
-        </div>
-        <div className="flex items-center gap-4 self-start sm:self-auto">
-          <Ring percent={overall} />
-          <div className="text-sm text-[var(--text-muted)]">
-            <div className="font-medium text-[var(--text-primary)]">Overall progress</div>
-            <div>across all workstreams</div>
+    <main className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+      {/* Hero with animated aurora */}
+      <div className="relative mb-10 overflow-hidden rounded-3xl border border-[var(--bg-border)] px-5 py-8 sm:px-8 sm:py-10">
+        <div className="aurora" />
+        <div className="relative z-10">
+          <WhatsNew dates={milestones.map((m) => m.at)} />
+          <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+            <div className="animate-fade-up">
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--bg-border)] bg-[var(--bg-surface)]/60 px-3 py-1 text-xs text-[var(--text-muted)]">
+                <span className="h-1.5 w-1.5 rounded-full pulse-dot" style={{ backgroundColor: 'var(--status-green)' }} />
+                Live delivery tracker
+              </div>
+              <h1 className="gradient-text text-3xl font-bold tracking-tight sm:text-4xl">
+                MyKASIH Command Centre
+              </h1>
+              <p className="mt-1 text-lg font-medium text-[var(--text-primary)]">Phase 2 Programme</p>
+              <p className="mt-2 text-sm text-[var(--text-muted)]">Target go-live: 7 Jul 2026</p>
+              {updatedAt && <p className="mt-1 text-xs text-[var(--text-muted)]">As of {fmtFull(updatedAt)}</p>}
+              {demoUrl && (
+                <a
+                  href={demoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:opacity-90"
+                  style={{ backgroundColor: 'var(--accent-primary)' }}
+                >
+                  <Rocket size={15} /> View live preview <ArrowUpRight size={14} />
+                </a>
+              )}
+            </div>
+            <div className="flex items-center gap-4 self-start sm:self-auto">
+              <AnimatedRing percent={overall} />
+              <div className="text-sm text-[var(--text-muted)]">
+                <div className="font-semibold text-[var(--text-primary)]">Overall progress</div>
+                <div>across all workstreams</div>
+              </div>
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Quick stats */}
-      <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <Stat icon={<CheckCircle2 size={16} />} label="Delivered" value={`${delivered} of ${total}`} color="var(--status-green)" />
-        <Stat icon={<Clock size={16} />} label="In progress" value={String(phases.filter((p) => p.status === 'In Progress').length)} color="var(--accent-teal)" />
-        <Stat icon={<CalendarDays size={16} />} label="Go-live" value="7 Jul 2026" color="var(--text-muted)" />
+      <section className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Stat icon={<CheckCircle2 size={16} />} label="Delivered" value={`${delivered} of ${total}`} color="var(--status-green)" delay={0} />
+        <Stat icon={<Clock size={16} />} label="In progress" value={String(inProgress)} color="var(--accent-teal)" delay={80} />
+        <Stat icon={<CalendarDays size={16} />} label="Go-live" value="7 Jul 2026" color="var(--text-muted)" delay={160} />
       </section>
 
-      {/* Delivery timeline (what's shipped) */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-lg font-medium text-[var(--text-primary)]">What we&rsquo;ve shipped</h2>
+      {/* Live build preview */}
+      {demoUrl && (
+        <Reveal className="mb-10">
+          <h2 className="mb-3 text-lg font-semibold text-[var(--text-primary)]">Live build preview</h2>
+          <LivePreview url={demoUrl} />
+        </Reveal>
+      )}
+
+      {/* What's shipped */}
+      <Reveal className="mb-10">
+        <h2 className="mb-4 text-lg font-semibold text-[var(--text-primary)]">What we&rsquo;ve shipped</h2>
         {milestones.length > 0 ? (
           <ol className="relative space-y-4 border-l border-[var(--bg-border)] pl-6">
             {milestones.map((m, i) => (
               <li key={i} className="relative">
                 <span
-                  className="absolute -left-[27px] top-1 h-3 w-3 rounded-full ring-4"
-                  style={{ backgroundColor: 'var(--status-green)', boxShadow: '0 0 0 4px var(--bg-primary)' }}
+                  className="absolute -left-[27px] top-1.5 h-3 w-3 rounded-full"
+                  style={{ backgroundColor: 'var(--status-green)', boxShadow: '0 0 0 4px var(--bg-primary), 0 0 14px var(--status-green)' }}
                 />
-                <div className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] px-4 py-3">
-                  <div className="text-[var(--text-primary)]">{m.label}</div>
+                <div className="card-hover rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] px-4 py-3">
+                  <div className="font-medium text-[var(--text-primary)]">{m.label}</div>
                   <div className="mt-0.5 text-sm text-[var(--text-muted)]">{fmtFull(m.at)}</div>
                 </div>
               </li>
             ))}
           </ol>
         ) : (
-          <p className="rounded-lg border border-[var(--bg-border)] bg-[var(--bg-surface)] px-4 py-4 text-sm text-[var(--text-muted)]">
+          <p className="rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] px-4 py-4 text-sm text-[var(--text-muted)]">
             No deliveries yet — shipped milestones will appear here as features go live.
           </p>
         )}
-      </section>
+      </Reveal>
 
-      {/* Workstream cards */}
-      <section className="mb-8">
-        <h2 className="mb-3 text-lg font-medium text-[var(--text-primary)]">Workstreams</h2>
+      {/* Workstreams */}
+      <Reveal className="mb-10">
+        <h2 className="mb-4 text-lg font-semibold text-[var(--text-primary)]">Workstreams</h2>
         <div className="grid gap-4 lg:grid-cols-2">
-          {phases.map((p) => (
-            <article key={p.name} className="rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-5">
-              <div className="mb-2 flex items-start justify-between gap-3">
-                <h3 className="text-base font-medium leading-snug text-[var(--text-primary)] sm:text-lg">{p.name}</h3>
-                <span
-                  className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
-                  style={{ backgroundColor: statusColor(p.status) + '22', color: statusColor(p.status) }}
-                >
-                  {p.status}
-                </span>
-              </div>
-              {p.blurb && <p className="mb-3 text-sm leading-relaxed text-[var(--text-muted)]">{p.blurb}</p>}
-              <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-[var(--bg-border)]">
-                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${p.percent}%`, backgroundColor: statusColor(p.status) }} />
-              </div>
-              <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
-                <span>{fmtRange(p.start, p.end)}</span>
-                <span>{p.percent}%</span>
-              </div>
-            </article>
-          ))}
+          {phases.map((p, i) => {
+            const color = statusColor(p.status)
+            const active = p.status === 'In Progress'
+            return (
+              <article
+                key={p.name}
+                className={`card-hover relative rounded-2xl border bg-[var(--bg-surface)] p-5 ${active ? 'animate-float-glow' : ''}`}
+                style={{ borderColor: active ? color : 'var(--bg-border)', animationDelay: `${i * 0.3}s` }}
+              >
+                <div className="mb-2 flex items-start justify-between gap-3">
+                  <h3 className="text-base font-semibold leading-snug text-[var(--text-primary)] sm:text-lg">{p.name}</h3>
+                  <span
+                    className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+                    style={{ backgroundColor: color + '22', color }}
+                  >
+                    {p.status}
+                  </span>
+                </div>
+                {p.blurb && <p className="mb-3 text-sm leading-relaxed text-[var(--text-muted)]">{p.blurb}</p>}
+                <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-[var(--bg-border)]">
+                  <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${p.percent}%`, backgroundColor: color }} />
+                </div>
+                <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
+                  <span>{fmtRange(p.start, p.end)}</span>
+                  <span className="font-semibold text-[var(--text-primary)]">{p.percent}%</span>
+                </div>
+              </article>
+            )
+          })}
         </div>
-      </section>
+      </Reveal>
 
-      {/* Programme timeline (scrolls on mobile) */}
-      <section className="mb-10">
-        <h2 className="mb-3 text-lg font-medium text-[var(--text-primary)]">Programme timeline</h2>
-        <div className="overflow-x-auto rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+      {/* Programme timeline */}
+      <Reveal className="mb-12">
+        <h2 className="mb-4 text-lg font-semibold text-[var(--text-primary)]">Programme timeline</h2>
+        <div className="overflow-x-auto rounded-2xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4 sm:p-5">
           <div className="min-w-[640px]">
             <div className="flex">
               <div className="w-[150px] shrink-0 sm:w-[200px]">
                 <div className="h-5" />
                 {phases.map((p) => (
-                  <div key={p.name} className="flex h-8 items-center truncate pr-3 text-xs text-[var(--text-primary)]" title={p.name}>
+                  <div key={p.name} className="flex h-9 items-center truncate pr-3 text-xs text-[var(--text-primary)]" title={p.name}>
                     {p.name}
                   </div>
                 ))}
@@ -180,15 +186,18 @@ export default async function ClientView({ params }: { params: Promise<{ token: 
                     <div key={d} className="text-center">{d % 5 === 0 || d === 1 ? d : ''}</div>
                   ))}
                 </div>
-                {phases.map((p) => (
-                  <div key={p.name} className="grid h-8 items-center" style={{ gridTemplateColumns: 'repeat(30, minmax(0,1fr))' }}>
-                    <div
-                      className="h-5 rounded transition-all"
-                      style={{ gridColumnStart: p.startDay, gridColumnEnd: p.endDay + 1, backgroundColor: statusColor(p.status), opacity: 0.85 }}
-                      title={`${fmtRange(p.start, p.end)} · ${p.status}`}
-                    />
-                  </div>
-                ))}
+                {phases.map((p) => {
+                  const color = statusColor(p.status)
+                  return (
+                    <div key={p.name} className="grid h-9 items-center" style={{ gridTemplateColumns: 'repeat(30, minmax(0,1fr))' }}>
+                      <div
+                        className="h-5 rounded-md transition-all"
+                        style={{ gridColumnStart: p.startDay, gridColumnEnd: p.endDay + 1, background: `linear-gradient(90deg, ${color}, ${color}cc)`, opacity: 0.9 }}
+                        title={`${fmtRange(p.start, p.end)} · ${p.status}`}
+                      />
+                    </div>
+                  )
+                })}
                 {showToday && (
                   <div className="pointer-events-none absolute top-0 bottom-0 z-10" style={{ left: `${todayLeft}%` }}>
                     <div className="h-full w-px" style={{ backgroundColor: 'var(--status-yellow)' }} />
@@ -201,23 +210,25 @@ export default async function ClientView({ params }: { params: Promise<{ token: 
             </div>
           </div>
         </div>
-      </section>
+      </Reveal>
 
-      <footer className="mt-12 border-t border-[var(--bg-border)] pt-6 text-center text-sm text-[var(--text-muted)]">
+      <footer className="mt-8 border-t border-[var(--bg-border)] pt-6 text-center text-sm text-[var(--text-muted)]">
         Prepared by Iceberg AI Solutions
       </footer>
     </main>
   )
 }
 
-function Stat({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
+function Stat({
+  icon, label, value, color, delay,
+}: { icon: React.ReactNode; label: string; value: string; color: string; delay: number }) {
   return (
-    <div className="rounded-xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4">
-      <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]" style={{ color }}>
+    <div className="card-hover animate-fade-up rounded-2xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-4" style={{ animationDelay: `${delay}ms` }}>
+      <div className="flex items-center gap-1.5 text-xs" style={{ color }}>
         {icon}
         <span className="text-[var(--text-muted)]">{label}</span>
       </div>
-      <div className="mt-1 text-lg font-semibold text-[var(--text-primary)]">{value}</div>
+      <div className="mt-1 text-lg font-bold text-[var(--text-primary)]">{value}</div>
     </div>
   )
 }

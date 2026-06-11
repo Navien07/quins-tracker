@@ -41,3 +41,107 @@ body {
 * {
   border-color: var(--bg-border);
 }
+
+html {
+  scroll-behavior: smooth;
+}
+::selection {
+  background: color-mix(in srgb, var(--accent-teal) 35%, transparent);
+}
+
+/* ── Keyframes ──────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes floatGlow {
+  0%, 100% { transform: translateY(0);    box-shadow: 0 8px 24px -16px rgba(0, 137, 123, 0.2); }
+  50%      { transform: translateY(-6px); box-shadow: 0 22px 48px -12px rgba(0, 137, 123, 0.45); }
+}
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes auroraMove {
+  0%   { transform: translate3d(-8%, -6%, 0) rotate(0deg); }
+  100% { transform: translate3d(8%, 6%, 0) rotate(6deg); }
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1;  transform: scale(1); }
+  50%      { opacity: .35; transform: scale(1.35); }
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-10vh) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Utilities ──────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(120deg, var(--text-primary), var(--accent-teal) 55%, var(--status-green));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradientShift 7s ease infinite;
+}
+.glass {
+  background: color-mix(in srgb, var(--bg-surface) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+.card-hover {
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  will-change: transform;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 44px -20px rgba(0, 0, 0, .7);
+  border-color: color-mix(in srgb, var(--accent-teal) 45%, var(--bg-border));
+}
+.animate-float       { animation: float 5s ease-in-out infinite; }
+.animate-float-glow  { animation: floatGlow 4.5s ease-in-out infinite; }
+.animate-fade-up     { animation: fadeUp .55s cubic-bezier(.22,.61,.36,1) both; }
+.pulse-dot           { animation: pulseDot 1.8s ease-in-out infinite; }
+.shimmer {
+  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-border) 50%, var(--bg-surface) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+.aurora {
+  position: absolute;
+  inset: -45%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 38% at 20% 30%, rgba(0, 137, 123, .28), transparent 60%),
+    radial-gradient(38% 38% at 82% 22%, rgba(63, 185, 80, .20), transparent 60%),
+    radial-gradient(42% 42% at 62% 82%, rgba(46, 125, 50, .20), transparent 60%);
+  filter: blur(44px);
+  animation: auroraMove 20s ease-in-out infinite alternate;
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .6s ease, transform .6s cubic-bezier(.22,.61,.36,1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-float, .animate-float-glow, .aurora, .gradient-text, .pulse-dot, .shimmer { animation: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .card-hover { transition: none; }
+}
