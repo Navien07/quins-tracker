@@ -4,7 +4,7 @@ import WhatsNew from './WhatsNew'
 import LivePreview from './LivePreview'
 import AnimatedRing from '@/components/AnimatedRing'
 import Reveal from '@/components/Reveal'
-import { CheckCircle2, Clock, CalendarDays, ArrowUpRight, Rocket, ChevronRight, Check } from 'lucide-react'
+import { CheckCircle2, Clock, CalendarDays, ArrowUpRight, Rocket, ChevronRight, Check, PlayCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,6 +160,18 @@ export default async function ClientView({ params }: { params: Promise<{ token: 
                   <span>{fmtRange(p.start, p.end)}</span>
                   <span className="font-semibold text-[var(--text-primary)]">{p.percent}%</span>
                 </div>
+
+                {p.previewUrl && (
+                  <a
+                    href={p.previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-white shadow transition hover:opacity-90"
+                    style={{ backgroundColor: color }}
+                  >
+                    <PlayCircle size={15} /> Try it live <ArrowUpRight size={13} />
+                  </a>
+                )}
 
                 {p.features.length > 0 && (() => {
                   const done = Math.round((p.percent / 100) * p.features.length)

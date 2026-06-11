@@ -22,7 +22,7 @@ export async function getClientData(token: string | null): Promise<ClientData | 
 
   const { data: phases } = await admin
     .from('phases')
-    .select('client_name,client_visible,status,percent,start_date,end_date,start_day,end_day,sort_order,updated_at')
+    .select('client_name,client_visible,status,percent,start_date,end_date,start_day,end_day,preview_url,sort_order,updated_at')
     .order('sort_order')
 
   const { data: acts } = await admin

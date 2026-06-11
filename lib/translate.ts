@@ -129,17 +129,26 @@ export function phaseFeatures(clientName: string): string[] {
   return (CLIENT_FEATURES[clientName] ?? []).filter((f) => isClean(f))
 }
 
+/** A live build URL is only shown to the client if it's a clean https link. */
+export function safePreviewUrl(url: string | null): string | null {
+  if (!url) return null
+  const u = url.trim()
+  if (!/^https:\/\//i.test(u)) return null
+  return isClean(u) ? u : null
+}
+
 /** Shape returned to the client view — derived ONLY from safe columns. */
 export interface ClientPhaseView {
-  name: string          // client_name
-  blurb: string | null  // brand-safe description
-  features: string[]    // brand-safe aspects
-  status: string        // clientStatus()
+  name: string             // client_name
+  blurb: string | null     // brand-safe description
+  features: string[]       // brand-safe aspects
+  previewUrl: string | null // brand-safe live build link
+  status: string           // clientStatus()
   percent: number
-  start: string         // start_date
-  end: string           // end_date
-  startDay: number      // 1..30
-  endDay: number        // 1..30
+  start: string            // start_date
+  end: string              // end_date
+  startDay: number         // 1..30
+  endDay: number           // 1..30
 }
 
 type PhaseRow = {
@@ -151,6 +160,7 @@ type PhaseRow = {
   end_date: string
   start_day: number
   end_day: number
+  preview_url: string | null
 }
 
 export function toClientPhases(rows: PhaseRow[]): ClientPhaseView[] {
@@ -160,6 +170,7 @@ export function toClientPhases(rows: PhaseRow[]): ClientPhaseView[] {
       name: r.client_name as string,
       blurb: phaseBlurb(r.client_name as string),
       features: phaseFeatures(r.client_name as string),
+      previewUrl: safePreviewUrl(r.preview_url),
       status: clientStatus(r.status),
       percent: r.percent,
       start: r.start_date,

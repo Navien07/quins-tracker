@@ -9,10 +9,11 @@ const STATUSES: PhaseStatus[] = ['not_started', 'in_progress', 'delivered', 'blo
 
 export async function PATCH(req: NextRequest) {
   if (!(await requireUser())) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
-  const { id, status, owner, percent } = await req.json()
+  const { id, status, owner, percent, preview_url } = await req.json()
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  if (preview_url !== undefined) patch.preview_url = (preview_url as string)?.trim() || null
   if (status !== undefined) {
     if (!STATUSES.includes(status)) {
       return NextResponse.json({ error: 'invalid status' }, { status: 400 })

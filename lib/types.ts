@@ -15,6 +15,7 @@ export interface Phase {
   percent: number
   owner: string | null
   sort_order: number
+  preview_url: string | null
 }
 
 export interface Task {

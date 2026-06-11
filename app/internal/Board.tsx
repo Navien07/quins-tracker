@@ -314,6 +314,7 @@ function PhaseCard({ phase, tasks, today }: { phase: Phase; tasks: Task[]; today
   const [status, setStatus] = useState<PhaseStatus>(phase.status)
   const [owner, setOwner] = useState(phase.owner ?? '')
   const [percent, setPercent] = useState(phase.percent)
+  const [previewUrl, setPreviewUrl] = useState(phase.preview_url ?? '')
 
   const h = phaseHealth(phase, today)
   const sm = STATUS_META[phase.status]
@@ -346,7 +347,7 @@ function PhaseCard({ phase, tasks, today }: { phase: Phase; tasks: Task[]; today
   }
   async function savePhase() {
     setBusy(true)
-    await api('/api/internal/phases', 'PATCH', { id: phase.id, status, owner, percent })
+    await api('/api/internal/phases', 'PATCH', { id: phase.id, status, owner, percent, preview_url: previewUrl })
     setBusy(false)
     refresh()
   }
@@ -456,6 +457,14 @@ function PhaseCard({ phase, tasks, today }: { phase: Phase; tasks: Task[]; today
                 Owner
                 <input
                   value={owner} onChange={(e) => setOwner(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--bg-border)] bg-[var(--bg-primary)] px-2 py-1 text-sm text-[var(--text-primary)]"
+                />
+              </label>
+              <label className="col-span-2 text-xs text-[var(--text-muted)]">
+                Live build URL (client can test) — https only
+                <input
+                  value={previewUrl} onChange={(e) => setPreviewUrl(e.target.value)}
+                  placeholder="https://preview.example.com"
                   className="mt-1 w-full rounded-md border border-[var(--bg-border)] bg-[var(--bg-primary)] px-2 py-1 text-sm text-[var(--text-primary)]"
                 />
               </label>

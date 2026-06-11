@@ -17,6 +17,7 @@ CREATE TABLE phases (
                     CHECK (status IN ('not_started','in_progress','delivered','blocked')),
   percent         int NOT NULL DEFAULT 0 CHECK (percent BETWEEN 0 AND 100),
   owner           text,                       -- internal only
+  preview_url     text,                        -- live build URL the client can test (https only)
   sort_order      int NOT NULL DEFAULT 0,
   updated_at      timestamptz DEFAULT now()
 );
